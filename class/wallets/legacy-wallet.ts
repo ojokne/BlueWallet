@@ -11,6 +11,7 @@ import { HDSegwitBech32Wallet } from '..';
 import { randomBytes } from '../rng';
 import { AbstractWallet } from './abstract-wallet';
 import { CreateTransactionResult, CreateTransactionTarget, CreateTransactionUtxo, Transaction, Utxo } from './types';
+import { isValidBech32Address } from '../../utils/isValidBech32Address';
 const ECPair: ECPairAPI = ECPairFactory(ecc);
 bitcoin.initEccLib(ecc);
 
@@ -553,8 +554,10 @@ export class LegacyWallet extends AbstractWallet {
     if (!address) return false;
     let cleanAddress = address;
 
-    if (this.segwitType === 'p2wpkh') {
-      cleanAddress = address.toLowerCase();
+    const isBech32Address = isValidBech32Address(address);
+
+    if (isBech32Address) {
+      cleanAddress = address.toLocaleLowerCase();
     }
 
     return this.getAddress() === cleanAddress || this._address === cleanAddress;
