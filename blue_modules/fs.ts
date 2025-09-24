@@ -9,7 +9,7 @@ import presentAlert from '../components/Alert';
 import loc from '../loc';
 import { isDesktop } from './environment';
 import { readFile } from './react-native-bw-file-access';
-import { base64ToUint8Array, uint8ArrayToString } from './uint8array-extras/index';
+import { base64ToUint8Array, uint8ArrayToString } from './uint8array-extras';
 
 const _sanitizeFileName = (fileName: string) => {
   // Remove any path delimiters and non-alphanumeric characters except for -, _, and .
