@@ -49,11 +49,12 @@ jobs:
           key: ${{ runner.os }}-ruby-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-ruby-
-
-      - name: Generate Build Number based on timestamp
+            
+      # DETERMINISTIC STEP: Use commit time instead of current time
+      - name: Generate Deterministic Build Number
         id: build_number
         run: |
-          NEW_BUILD_NUMBER="$(date +%s)"
+          NEW_BUILD_NUMBER=$(git log -1 --format=%ct)
           echo "NEW_BUILD_NUMBER=$NEW_BUILD_NUMBER" >> $GITHUB_ENV
 
       - name: Prepare Keystore
@@ -67,6 +68,7 @@ jobs:
           bundle exec fastlane android update_version_build_and_sign_apk
         env:
           BUILD_NUMBER: ${{ env.NEW_BUILD_NUMBER }}
+          SOURCE_DATE_EPOCH: ${{ env.NEW_BUILD_NUMBER }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
       - name: Determine APK Filename and Path
