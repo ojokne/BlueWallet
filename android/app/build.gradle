@@ -150,11 +150,7 @@ dependencies {
 apply plugin: 'com.google.gms.google-services'  // Google Services plugin
 apply plugin: "com.bugsnag.android.gradle"
 bugsnag {
-    // This is the most common flag in v7+ to stop the build-time injection
     reportBuilds = false
-    
-    // Alternatively, disable the plugin for the 'release' variant entirely 
-    // to ensure NO metadata is injected during compilation
     variantFilter { variant ->
         if (variant.name.contains("release")) {
             enabled = false
