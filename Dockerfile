@@ -1,5 +1,5 @@
 # 1. Base image with Digest pinning
-FROM node:24-bullseye@sha256:38edad6b2e5962120f5144ff9dd3dbd223c7f140ba6fa03920d62d28b021402b
+FROM node:24-bullseye@sha256:597306380830419c70897a39ec0037113f7adc118b4e8d703d7f28136cac434f
 
 # 2. Environment Setup
 ENV TZ=UTC \
@@ -11,19 +11,17 @@ ENV TZ=UTC \
 # 3. Update Path to include all pinned tool locations
 ENV PATH=$ANDROID_SDK_ROOT/cmdline-tools/11.0/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/35.0.0:$JAVA_HOME/bin:$PATH
 
-# 4. Install pinned system packages
-# Note: If these specific versions fail, update the suffix to match the current Debian security mirror
+# 4. Install  system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    git \
     unzip \
     zip \
     libglu1-mesa \
     wget \
-    build-essential \
-    ruby-full \
-    openjdk-17-jdk \
+    openjdk-17-jdk-headless \
     && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get clean
 
 # 5. Download, Verify, and Install Android Command Line Tools
 RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools \
@@ -39,9 +37,23 @@ RUN yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses \
     "platforms;android-35" \
     "build-tools;35.0.0" \
     "ndk;27.1.12297006" \
+    "ndk;27.0.12077973"  \
     "platform-tools" \
     && rm -rf $ANDROID_SDK_ROOT/cmdline-tools/tmp
+
+# Pre-copy only Gradle wrapper files
+WORKDIR /app/android
+COPY android/gradle/wrapper ./gradle/wrapper
+COPY android/gradlew .
+COPY android/build.gradle .
+COPY android/settings.gradle .
+
+# Trigger Gradle download
+RUN ./gradlew --version
+
 
 WORKDIR /app
 
 COPY . /app
+
+CMD ["bash", "-c", "npm ci && cd android && ./gradlew assembleRelease && sha256sum app/build/outputs/apk/release/app-release-unsigned.apk"]
