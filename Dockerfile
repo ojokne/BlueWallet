@@ -1,5 +1,5 @@
 # 1. Base image with Digest pinning
-FROM node:24-bullseye@sha256:597306380830419c70897a39ec0037113f7adc118b4e8d703d7f28136cac434f
+FROM node:24-bullseye-slim@sha256:597306380830419c70897a39ec0037113f7adc118b4e8d703d7f28136cac434f
 
 # 2. Environment Setup
 ENV TZ=UTC \
@@ -38,6 +38,7 @@ RUN yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses \
     "build-tools;35.0.0" \
     "ndk;27.1.12297006" \
     "ndk;27.0.12077973"  \
+    "cmake;3.22.1" \
     "platform-tools" \
     && rm -rf $ANDROID_SDK_ROOT/cmdline-tools/tmp
 
@@ -55,5 +56,3 @@ RUN ./gradlew --version
 WORKDIR /app
 
 COPY . /app
-
-CMD ["bash", "-c", "npm ci && cd android && ./gradlew assembleRelease && sha256sum app/build/outputs/apk/release/app-release-unsigned.apk"]
